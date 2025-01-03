@@ -117,7 +117,12 @@ POST /api/token/refresh/
 
 Para ejecutar las pruebas:
 ```bash
-python manage.py test
+pytest
+```
+
+Para ejecutar las pruebas con coverage:
+```bash
+pytest --cov=books
 ```
 
 ## Notas de Seguridad
