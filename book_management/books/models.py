@@ -20,6 +20,7 @@ class Book:
 
     @classmethod
     def from_db(cls, data):
+        # Método de clase para crear una instancia de Book a partir de datos de la base de datos
         if not data:
             return None
         return cls(
@@ -32,6 +33,7 @@ class Book:
         )
 
     def to_dict(self):
+        # Método de instancia para convertir los atributos del libro en un diccionario
         return {
             '_id': self._id,
             'title': self.title,

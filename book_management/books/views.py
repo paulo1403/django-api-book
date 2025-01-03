@@ -13,7 +13,7 @@ from .serializers.book_serializer import BookSerializer
 from .models import Book
 from .utils.mongo_connection import MongoDBConnection
 
-# User Registration
+# Registro de Usuarios
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
@@ -50,7 +50,7 @@ class UserRegistrationView(generics.CreateAPIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# Book Views
+# Vistas de Libros
 class BookListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -104,12 +104,12 @@ class BookDetailView(APIView):
             mongo = MongoDBConnection.get_instance()
             books_collection = mongo.get_collection(Book.collection_name)
             
-            # Prepare update data
+            # Preparar datos actualizados
             updated_data = serializer.validated_data
             updated_data['published_date'] = datetime.strptime(request.data['published_date'], '%Y-%m-%d')
             updated_data['updated_at'] = timezone.now()
             
-            # Use find_one_and_update to get the updated document
+            # Usar find_one_and_update para obtener el documento actualizado
             result = books_collection.find_one_and_update(
                 {'_id': ObjectId(pk)},
                 {'$set': updated_data},
@@ -117,7 +117,7 @@ class BookDetailView(APIView):
             )
             
             if result:
-                # Convert the result back to a Book object and serialize
+                # Convertir el resultado de nuevo a un objeto Book y serializar
                 updated_book = Book.from_db(result)
                 return Response(BookSerializer(updated_book).data)
             return Response({'error': 'Update failed'}, status=status.HTTP_400_BAD_REQUEST)
@@ -139,11 +139,11 @@ class BookViewSet(viewsets.ViewSet):
             book_collection = Book.get_collection()
             book_data = request.data.copy()
             
-            # Convert published_date string to datetime
+            # Convertir la cadena de fecha de publicación a datetime
             if 'published_date' in book_data:
                 book_data['published_date'] = datetime.strptime(book_data['published_date'], '%Y-%m-%d')
 
-            # Update the document and get the updated version
+            # Actualizar el documento y obtener la versión actualizada
             result = book_collection.find_one_and_update(
                 {'_id': ObjectId(pk)},
                 {'$set': book_data},
@@ -151,9 +151,9 @@ class BookViewSet(viewsets.ViewSet):
             )
 
             if result:
-                # Convert ObjectId to string for serialization
+                # Convertir ObjectId a cadena para la serialización
                 result['_id'] = str(result['_id'])
-                # Convert datetime back to string for response
+                # Convertir datetime de nuevo a cadena para la respuesta
                 result['published_date'] = result['published_date'].strftime('%Y-%m-%d')
                 return Response(result)
             return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
