@@ -9,7 +9,6 @@ class Book:
         self._id = _id if _id else ObjectId()
         self.title = title
         self.author = author
-        # Ensure published_date is always a datetime
         if isinstance(published_date, datetime):
             self.published_date = published_date
         else:

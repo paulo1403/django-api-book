@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from datetime import datetime
 
+
 class BookSerializer(serializers.Serializer):
-    id = serializers.CharField(source='_id', read_only=True)
+    id = serializers.CharField(source="_id", read_only=True)
     title = serializers.CharField(max_length=200)
     author = serializers.CharField(max_length=200)
-    published_date = serializers.DateTimeField()  # Changed from DateField to DateTimeField
+    published_date = serializers.DateTimeField()
     genre = serializers.CharField(max_length=100)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     created_at = serializers.DateTimeField(read_only=True)
@@ -14,7 +15,7 @@ class BookSerializer(serializers.Serializer):
     def validate_price(self, value):
         if value < 0:
             raise serializers.ValidationError("Price cannot be negative")
-        return float(value)  # Convertir a float para MongoDB
+        return float(value)
 
     def validate_published_date(self, value):
         if isinstance(value, datetime):
