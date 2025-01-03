@@ -80,7 +80,7 @@ POST /api/token/
 
 2. Usar el token en las peticiones:
 ```bash
-Authorization: Bearer <tu_token_de_acceso>
+Authorization: Token <tu_token_de_acceso>
 ```
 
 3. Refrescar token:
