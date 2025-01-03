@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from datetime import datetime
 
-
 class BookSerializer(serializers.Serializer):
     id = serializers.CharField(source="_id", read_only=True)
     title = serializers.CharField(max_length=200)
@@ -13,11 +12,13 @@ class BookSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def validate_price(self, value):
+        # Método de instancia para validar el precio
         if value < 0:
             raise serializers.ValidationError("Price cannot be negative")
         return float(value)
 
     def validate_published_date(self, value):
+        # Método de instancia para validar la fecha de publicación
         if isinstance(value, datetime):
             compare_date = value.date()
         else:
