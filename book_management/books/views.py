@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -104,15 +104,23 @@ class BookDetailView(APIView):
             mongo = MongoDBConnection.get_instance()
             books_collection = mongo.get_collection(Book.collection_name)
             
-            # Actualizar datos
+            # Prepare update data
             updated_data = serializer.validated_data
+            updated_data['published_date'] = datetime.strptime(request.data['published_date'], '%Y-%m-%d')
             updated_data['updated_at'] = timezone.now()
             
-            books_collection.update_one(
+            # Use find_one_and_update to get the updated document
+            result = books_collection.find_one_and_update(
                 {'_id': ObjectId(pk)},
-                {'$set': updated_data}
+                {'$set': updated_data},
+                return_document=True
             )
-            return Response(serializer.data)
+            
+            if result:
+                # Convert the result back to a Book object and serialize
+                updated_book = Book.from_db(result)
+                return Response(BookSerializer(updated_book).data)
+            return Response({'error': 'Update failed'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
@@ -124,6 +132,33 @@ class BookDetailView(APIView):
         books_collection = mongo.get_collection(Book.collection_name)
         books_collection.delete_one({'_id': ObjectId(pk)})
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class BookViewSet(viewsets.ViewSet):
+    def update(self, request, pk=None):
+        try:
+            book_collection = Book.get_collection()
+            book_data = request.data.copy()
+            
+            # Convert published_date string to datetime
+            if 'published_date' in book_data:
+                book_data['published_date'] = datetime.strptime(book_data['published_date'], '%Y-%m-%d')
+
+            # Update the document and get the updated version
+            result = book_collection.find_one_and_update(
+                {'_id': ObjectId(pk)},
+                {'$set': book_data},
+                return_document=True
+            )
+
+            if result:
+                # Convert ObjectId to string for serialization
+                result['_id'] = str(result['_id'])
+                # Convert datetime back to string for response
+                result['published_date'] = result['published_date'].strftime('%Y-%m-%d')
+                return Response(result)
+            return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class BookYearStatsView(APIView):
     permission_classes = [IsAuthenticated]

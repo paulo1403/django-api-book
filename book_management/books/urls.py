@@ -5,7 +5,7 @@ from . import views
 app_name = "books"
 
 urlpatterns = [
-    # Autenticación
+    # Authentication endpoints
     path("token/", token_views.obtain_auth_token, name="token_obtain"),
     path("register/", views.UserRegistrationView.as_view(), name="register"),
     # Books endpoints
