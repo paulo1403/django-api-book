@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+# Establecer el directorio de trabajo
+WORKDIR /app/book_management
 
 # Instalar dependencias del sistema
 RUN apt-get update && \
@@ -9,14 +10,11 @@ RUN apt-get update && \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements.txt primero para aprovechar la caché de Docker
-COPY requirements.txt .
+# Copiar todo el contenido del proyecto
+COPY . /app/
 
 # Instalar dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copiar el resto del código
-COPY . .
 
 # Recolectar archivos estáticos
 RUN python manage.py collectstatic --noinput
