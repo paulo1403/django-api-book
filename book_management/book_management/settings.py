@@ -11,8 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# Temporarily enable DEBUG for troubleshooting
+DEBUG = True
 
 # Update ALLOWED_HOSTS to accept Railway domain
 ALLOWED_HOSTS = ['*']  # En producción, especifica tu dominio de Railway
@@ -65,17 +65,16 @@ TEMPLATES = [
     },
 ]
 
-# Eliminar la configuración de DATABASES y dejar solo MongoDB
+# Replace the DATABASES configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': os.getenv('MONGODB_NAME', 'bookmanagement'),
+        'CLIENT': {
+            'host': os.getenv('MONGODB_URI'),
+        }
     }
 }
-
-# MongoDB Database
-MONGODB_URI = os.getenv('MONGODB_URI')
-MONGODB_NAME = os.getenv('MONGODB_NAME')
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
@@ -142,10 +141,10 @@ STATICFILES_DIRS = [
 ]
 
 # Configuración para HTTPS
-SECURE_SSL_REDIRECT = True  # Force HTTPS
+SECURE_SSL_REDIRECT = False  # Disable SSL temporarily for testing
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -170,14 +169,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Update CORS settings
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-    "https://django-api-book-production.up.railway.app",
-    "https://book-management-portal.netlify.app",
-    "http://django-api-book-production.up.railway.app"  # Add HTTP version
-]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True
+
+# Remove CORS_ALLOWED_ORIGINS temporarily
+# CORS_ALLOWED_ORIGINS = ...
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
@@ -213,3 +209,4 @@ CORS_ORIGIN_WHITELIST = [
     'https://django-api-book-production.up.railway.app',
     'https://book-management-portal.netlify.app'  # Add Netlify domain
 ]
+
