@@ -31,10 +31,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
     'books',
+    'corsheaders',  # Add this line
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Add this line (should be at the top)
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Añadir después de SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -164,3 +166,34 @@ SWAGGER_SETTINGS = {
 
 # Add this at the end of the file
 CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+
+# Add these CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Add these headers to the allowed headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Add allowed methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
