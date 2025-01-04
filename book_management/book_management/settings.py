@@ -61,15 +61,10 @@ TEMPLATES = [
     },
 ]
 
-# Update DATABASE configuration for Railway
+# Eliminar la configuración de DATABASES y dejar solo MongoDB
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('PGDATABASE', 'railway'),
-        'USER': os.getenv('PGUSER', 'postgres'),
-        'PASSWORD': os.getenv('PGPASSWORD', ''),
-        'HOST': os.getenv('PGHOST', 'localhost'),
-        'PORT': os.getenv('PGPORT', '5432'),
+        'ENGINE': 'django.db.backends.dummy'
     }
 }
 
