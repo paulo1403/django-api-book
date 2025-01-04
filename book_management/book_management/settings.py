@@ -142,9 +142,10 @@ STATICFILES_DIRS = [
 ]
 
 # Configuración para HTTPS
-SECURE_SSL_REDIRECT = False  # Cambiar a True en producción
-SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
-CSRF_COOKIE_SECURE = False  # Cambiar a True en producción
+SECURE_SSL_REDIRECT = True  # Force HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -169,14 +170,18 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Update CORS settings
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://127.0.0.1:5174",
     "https://django-api-book-production.up.railway.app",
-    "https://book-management-portal.netlify.app"  # Add Netlify domain
+    "https://book-management-portal.netlify.app",
+    "http://django-api-book-production.up.railway.app"  # Add HTTP version
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
 
 # Add these headers to the allowed headers
 CORS_ALLOW_HEADERS = [
