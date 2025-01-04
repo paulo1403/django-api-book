@@ -14,7 +14,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# Update ALLOWED_HOSTS to accept Railway domain
+ALLOWED_HOSTS = ['*']  # In production, replace with your actual domain
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -58,10 +59,15 @@ TEMPLATES = [
     },
 ]
 
+# Update DATABASE configuration for Railway
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('PGDATABASE', 'railway'),
+        'USER': os.getenv('PGUSER', 'postgres'),
+        'PASSWORD': os.getenv('PGPASSWORD', ''),
+        'HOST': os.getenv('PGHOST', 'localhost'),
+        'PORT': os.getenv('PGPORT', '5432'),
     }
 }
 
@@ -145,3 +151,6 @@ SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'SECURITY_REQUIREMENTS': [{'Bearer': []}],
 }
+
+# Add this at the end of the file
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
