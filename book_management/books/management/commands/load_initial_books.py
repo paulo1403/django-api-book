@@ -52,6 +52,33 @@ class Command(BaseCommand):
                 "price": 22.99,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now()
+            },
+            {
+                "title": "La Casa de los Espíritus",
+                "author": "Isabel Allende",
+                "published_date": datetime(2000, 1, 15),
+                "genre": "Realismo mágico",
+                "price": 23.99,
+                "created_at": datetime.now(),
+                "updated_at": datetime.now()
+            },
+            {
+                "title": "Memoria de mis Putas Tristes",
+                "author": "Gabriel García Márquez",
+                "published_date": datetime(2000, 1, 15),
+                "genre": "Novela",
+                "price": 21.99,
+                "created_at": datetime.now(),
+                "updated_at": datetime.now()
+            },
+            {
+                "title": "La Sombra del Viento",
+                "author": "Carlos Ruiz Zafón",
+                "published_date": datetime(2000, 1, 15),
+                "genre": "Misterio",
+                "price": 24.99,
+                "created_at": datetime.now(),
+                "updated_at": datetime.now()
             }
         ]
 

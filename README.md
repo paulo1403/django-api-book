@@ -8,6 +8,13 @@ Una API RESTful construida con Django REST Framework para la gestión de libros 
 - MongoDB
 - pip (gestor de paquetes de Python)
 
+## Cargar Datos Iniciales
+
+Para cargar un conjunto de libros de ejemplo en la base de datos, ejecute:
+```bash
+python manage.py load_initial_books
+```
+
 ## Instalación
 
 1. Clonar el repositorio:
