@@ -18,6 +18,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ['*']  # En producción, especifica tu dominio de Railway
 
 CORS_ALLOW_ALL_ORIGINS = True  # En producción, especifica los orígenes permitidos
+CORS_ORIGIN_ALLOW_ALL = True  # Add this line
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -164,13 +165,18 @@ SWAGGER_SETTINGS = {
     'SECURITY_REQUIREMENTS': [{'Bearer': []}],
 }
 
-# Add this at the end of the file
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+# Update CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'http://*.railway.app',
+    'https://django-api-book-production.up.railway.app'
+]
 
-# Add these CORS settings
+# Update CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "https://django-api-book-production.up.railway.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -196,4 +202,9 @@ CORS_ALLOW_METHODS = [
     'PATCH',
     'POST',
     'PUT',
+]
+
+# Add these additional CORS settings
+CORS_ORIGIN_WHITELIST = [
+    'https://django-api-book-production.up.railway.app',
 ]
