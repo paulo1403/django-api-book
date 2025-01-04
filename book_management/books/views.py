@@ -12,6 +12,8 @@ from datetime import datetime
 from .serializers.book_serializer import BookSerializer
 from .models import Book
 from .utils.mongo_connection import MongoDBConnection
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 
 # Registro de Usuarios
 class UserSerializer(ModelSerializer):
@@ -212,3 +214,26 @@ class BookYearStatsView(APIView):
             'maximum_price': stats[0]['max_price'],
             'total_books': stats[0]['total_books']
         })
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'date_joined': user.date_joined
+        })
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        # Eliminar el token del usuario
+        Token.objects.filter(user=request.user).delete()
+        return Response({'message': 'Successfully logged out'}, 
+                      status=status.HTTP_200_OK)

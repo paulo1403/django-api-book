@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.authtoken import views as token_views
 from . import views
+from .views import UserProfileView, LogoutView
 
 app_name = "books"
 
@@ -16,4 +17,6 @@ urlpatterns = [
         views.BookYearStatsView.as_view(),
         name="book-year-stats",
     ),
+    path('user/profile/', UserProfileView.as_view(), name='user-profile'),
+    path('user/logout/', LogoutView.as_view(), name='logout'),
 ]
