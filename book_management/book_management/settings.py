@@ -15,7 +15,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Update ALLOWED_HOSTS to accept Railway domain
-ALLOWED_HOSTS = ['*']  # In production, replace with your actual domain
+ALLOWED_HOSTS = ['*']  # En producción, especifica tu dominio de Railway
+
+CORS_ALLOW_ALL_ORIGINS = True  # En producción, especifica los orígenes permitidos
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -136,6 +138,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Configuración para HTTPS
+SECURE_SSL_REDIRECT = False  # Cambiar a True en producción
+SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
+CSRF_COOKIE_SECURE = False  # Cambiar a True en producción
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
