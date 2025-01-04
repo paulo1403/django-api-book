@@ -15,12 +15,21 @@ from .utils.mongo_connection import MongoDBConnection
 
 # Registro de Usuarios
 class UserSerializer(ModelSerializer):
+    password_confirmation = serializers.CharField(write_only=True)
+    
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'email')
+        fields = ('id', 'username', 'password', 'email', 'password_confirmation')
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    def validate(self, data):
+        if data['password'] != data['password_confirmation']:
+            raise serializers.ValidationError({
+                'password_confirmation': 'Passwords do not match'
+            })
+        return data
 
 class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -43,6 +52,7 @@ class UserRegistrationView(generics.CreateAPIView):
                 password=serializer.validated_data['password']
             )
             return Response({
+                'message': 'User created successfully',
                 'id': user.id,
                 'username': user.username,
                 'email': user.email
