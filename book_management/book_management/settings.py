@@ -17,7 +17,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # Update ALLOWED_HOSTS to accept Railway domain
 ALLOWED_HOSTS = ['*']  # En producción, especifica tu dominio de Railway
 
-CORS_ALLOW_ALL_ORIGINS = True  # En producción, especifica los orígenes permitidos
+CORS_ALLOW_ALL_ORIGINS = False  # Change this to False since we're specifying origins
 CORS_ORIGIN_ALLOW_ALL = True  # Add this line
 
 INSTALLED_APPS = [
@@ -36,8 +36,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # This must be first
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Add this line (should be at the top)
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Añadir después de SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -102,8 +102,6 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
     
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
@@ -112,8 +110,6 @@ SIMPLE_JWT = {
     
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
-    
-    'JTI_CLAIM': 'jti',
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -176,7 +172,8 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://127.0.0.1:5174",
-    "https://django-api-book-production.up.railway.app"
+    "https://django-api-book-production.up.railway.app",
+    "https://book-management-portal.netlify.app"  # Add Netlify domain
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -192,6 +189,8 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'access-control-allow-origin',
+    'access-control-allow-headers'
 ]
 
 # Add allowed methods
@@ -207,4 +206,5 @@ CORS_ALLOW_METHODS = [
 # Add these additional CORS settings
 CORS_ORIGIN_WHITELIST = [
     'https://django-api-book-production.up.railway.app',
+    'https://book-management-portal.netlify.app'  # Add Netlify domain
 ]
