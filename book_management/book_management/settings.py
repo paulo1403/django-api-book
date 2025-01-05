@@ -72,12 +72,11 @@ DATABASES = {
         "ENFORCE_SCHEMA": False,
         "CLIENT": {
             "host": os.getenv("MONGODB_URI"),
-            "port": 27017,
             "username": os.getenv("MONGODB_USERNAME"),
             "password": os.getenv("MONGODB_PASSWORD"),
             "authSource": "admin",
             "authMechanism": "SCRAM-SHA-1",
-            "ssl": True,
+            "ssl": False,  # Changed to False for Railway internal connection
             "tlsAllowInvalidCertificates": True,
             "serverSelectionTimeoutMS": 30000,
             "connectTimeoutMS": 30000,
@@ -88,12 +87,6 @@ DATABASES = {
 
 # Asegurarnos de que DEBUG está en False en producción
 DEBUG = os.getenv("DEBUG", "False") == "True"
-
-
-# Configuración específica para Railway
-if os.getenv("RAILWAY_ENVIRONMENT"):
-    DATABASES["default"]["CLIENT"]["host"] = os.getenv("MONGODB_URI")
-    DATABASES["default"]["NAME"] = os.getenv("MONGODB_NAME", "book_management")
 
 # Create static directory if it doesn't exist
 if not os.path.exists(os.path.join(BASE_DIR, "static")):
