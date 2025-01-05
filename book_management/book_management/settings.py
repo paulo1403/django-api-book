@@ -69,10 +69,24 @@ MONGODB_URI = os.getenv('MONGODB_URI')
 if not MONGODB_URI:
     raise ValueError("MONGODB_URI environment variable is not set!")
 
-MONGODB_CLIENT = MongoClient(MONGODB_URI)
+# Configuración para MongoDB Atlas (para Railway)
+MONGODB_CLIENT = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+try:
+    # Verificar la conexión
+    MONGODB_CLIENT.server_info()
+except Exception as e:
+    print(f"Error connecting to MongoDB: {e}")
+    raise e
+
 MONGODB_DB = MONGODB_CLIENT[os.getenv('MONGODB_NAME', 'book_management')]
 
-# Remove DATABASES setting since we're using pure PyMongo
+# Minimal SQLite configuration for Django auth
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Create static directory if it doesn't exist
 if not os.path.exists(os.path.join(BASE_DIR, 'static')):
