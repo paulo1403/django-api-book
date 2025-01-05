@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
-from mongoengine import connect
 from pymongo import MongoClient
 
 load_dotenv()
@@ -32,7 +31,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',  # Add this line
     'rest_framework_simplejwt',
-    'rest_framework_mongoengine',  # Add this
     'drf_yasg',
     'books',
     'corsheaders',  # Add this line
