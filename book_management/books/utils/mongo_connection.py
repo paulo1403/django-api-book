@@ -13,7 +13,16 @@ class MongoDBConnection:
 
     def __init__(self):
         if self._client is None:
-            self._client = MongoClient(settings.MONGODB_URI)
+            self._client = MongoClient(
+                settings.MONGODB_URI,
+                ssl=True,
+                ssl_cert_reqs='CERT_NONE',
+                retryWrites=True,
+                connectTimeoutMS=30000,
+                socketTimeoutMS=None,
+                connect=False,
+                maxPoolSize=1
+            )
             self._db = self._client[settings.MONGODB_DB.name]
 
     def get_collection(self, collection_name):
