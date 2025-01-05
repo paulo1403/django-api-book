@@ -2,24 +2,19 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
-from pymongo import MongoClient
 
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-# Temporarily enable DEBUG for troubleshooting
 DEBUG = True
 
-# Update ALLOWED_HOSTS to accept Railway domain
-ALLOWED_HOSTS = ["*"]  # En producción, especifica tu dominio de Railway
+ALLOWED_HOSTS = ["*"]
 
-CORS_ALLOW_ALL_ORIGINS = False  # Change this to False since we're specifying origins
-CORS_ORIGIN_ALLOW_ALL = True  # Add this line
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -29,7 +24,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework.authtoken",  # Add this line
+    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "drf_yasg",
     "books",
@@ -37,7 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Añadir después de SecurityMiddleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -64,32 +59,30 @@ TEMPLATES = [
     },
 ]
 
-# Configuración de Djongo actualizada para MongoDB Atlas
 DATABASES = {
     "default": {
         "ENGINE": "djongo",
         "NAME": os.getenv("MONGODB_NAME", "book_management"),
         "CLIENT": {
             "host": os.getenv("MONGODB_URI"),
+            "username": os.getenv("MONGODB_USERNAME"),
+            "password": os.getenv("MONGODB_PASSWORD"),
             "ssl": True,
             "tlsAllowInvalidCertificates": True,
-            "serverSelectionTimeoutMS": 60000,  # Increased timeout
-            "connectTimeoutMS": 60000,          # Increased timeout
+            "serverSelectionTimeoutMS": 60000,
+            "connectTimeoutMS": 60000,
             "retryWrites": True,
-            "maxPoolSize": 100,                 # Added connection pool
-            "w": "majority",                    # Write concern
+            "maxPoolSize": 100,
+            "w": "majority",
         },
     }
 }
 
-# Asegurarnos de que DEBUG está en False en producción
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-# Create static directory if it doesn't exist
 if not os.path.exists(os.path.join(BASE_DIR, "static")):
     os.makedirs(os.path.join(BASE_DIR, "static"))
 
-# Django REST Framework settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -145,13 +138,11 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Extra places for collectstatic to find static files
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-# Configuración para HTTPS
-SECURE_SSL_REDIRECT = False  # Disable SSL temporarily for testing
+SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
@@ -171,25 +162,19 @@ SWAGGER_SETTINGS = {
     "SECURITY_REQUIREMENTS": [{"Bearer": []}],
 }
 
-# Update CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     "https://*.railway.app",
     "http://*.railway.app",
     "https://django-api-book-production.up.railway.app",
 ]
 
-# Update CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
 
-# Remove CORS_ALLOWED_ORIGINS temporarily
-# CORS_ALLOWED_ORIGINS = ...
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
-CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
+CORS_PREFLIGHT_MAX_AGE = 86400
 
-# Add these headers to the allowed headers
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
@@ -204,7 +189,6 @@ CORS_ALLOW_HEADERS = [
     "access-control-allow-headers",
 ]
 
-# Add allowed methods
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
@@ -214,16 +198,13 @@ CORS_ALLOW_METHODS = [
     "PUT",
 ]
 
-# Add these additional CORS settings
 CORS_ORIGIN_WHITELIST = [
     "https://django-api-book-production.up.railway.app",
-    "https://book-management-portal.netlify.app",  # Add Netlify domain
+    "https://book-management-portal.netlify.app",
 ]
 
-# Production settings
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-# Railway URL
 RAILWAY_STATIC_URL = "https://django-api-book-production.up.railway.app"
 
 ALLOWED_HOSTS = [
@@ -233,7 +214,6 @@ ALLOWED_HOSTS = [
     "*",
 ]
 
-# Production security settings
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -242,7 +222,6 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Static files configuration
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
