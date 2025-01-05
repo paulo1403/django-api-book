@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
+from mongoengine import connect
 
 load_dotenv()
 
@@ -30,6 +31,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',  # Add this line
     'rest_framework_simplejwt',
+    'rest_framework_mongoengine',  # Add this
     'drf_yasg',
     'books',
     'corsheaders',  # Add this line
@@ -65,16 +67,23 @@ TEMPLATES = [
     },
 ]
 
-# Replace the DATABASES configuration
+# Replace the DATABASES configuration with SQLite for Django auth
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': os.getenv('MONGODB_NAME', 'bookmanagement'),
-        'CLIENT': {
-            'host': os.getenv('MONGODB_URI'),
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# MongoDB connection with mongoengine
+connect(
+    db=os.getenv('MONGODB_NAME', 'bookmanagement'),
+    host=os.getenv('MONGODB_URI')
+)
+
+# Create static directory if it doesn't exist
+if not os.path.exists(os.path.join(BASE_DIR, 'static')):
+    os.makedirs(os.path.join(BASE_DIR, 'static'))
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
@@ -209,4 +218,31 @@ CORS_ORIGIN_WHITELIST = [
     'https://django-api-book-production.up.railway.app',
     'https://book-management-portal.netlify.app'  # Add Netlify domain
 ]
+
+# Production settings
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# Railway URL
+RAILWAY_STATIC_URL = 'https://django-api-book-production.up.railway.app'
+
+ALLOWED_HOSTS = [
+    'django-api-book-production.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+    '*',
+]
+
+# Production security settings
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
