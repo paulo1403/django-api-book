@@ -1,9 +1,15 @@
 from django.utils import timezone
 from bson import ObjectId
 from datetime import datetime
+from pymongo import MongoClient
+import os
+
+# MongoDB connection
+client = MongoClient(os.getenv('MONGODB_URI'))
+db = client[os.getenv('MONGODB_NAME', 'book_management')]
 
 class Book:
-    collection_name = 'books'
+    collection = db['books']
 
     def __init__(self, title, author, published_date, genre, price, _id=None):
         self._id = _id if _id else ObjectId()
@@ -44,3 +50,26 @@ class Book:
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
+
+    def save(self):
+        data = self.to_dict()
+        if hasattr(self, '_id'):
+            self.collection.update_one(
+                {'_id': self._id},
+                {'$set': data},
+                upsert=True
+            )
+        return self
+
+    @classmethod
+    def find_all(cls):
+        return [cls.from_db(doc) for doc in cls.collection.find()]
+
+    @classmethod
+    def find_by_id(cls, id):
+        doc = cls.collection.find_one({'_id': ObjectId(id)})
+        return cls.from_db(doc) if doc else None
+
+    def delete(self):
+        if hasattr(self, '_id'):
+            self.collection.delete_one({'_id': self._id})

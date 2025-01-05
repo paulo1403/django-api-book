@@ -3,6 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
 from mongoengine import connect
+from pymongo import MongoClient
 
 load_dotenv()
 
@@ -67,15 +68,21 @@ TEMPLATES = [
     },
 ]
 
-# Remove SQLite configuration and use only MongoDB
-DATABASES = {}  # Django needs this empty dict
-
-# MongoDB connection with mongoengine
+# MongoDB configuration using pymongo
 MONGODB_URI = os.getenv('MONGODB_URI')
 if not MONGODB_URI:
     raise ValueError("MONGODB_URI environment variable is not set!")
 
-connect(host=MONGODB_URI)
+MONGODB_CLIENT = MongoClient(MONGODB_URI)
+MONGODB_DB = MONGODB_CLIENT[os.getenv('MONGODB_NAME', 'book_management')]
+
+# Minimal Django database config for sessions
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Create static directory if it doesn't exist
 if not os.path.exists(os.path.join(BASE_DIR, 'static')):
