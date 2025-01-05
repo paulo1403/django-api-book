@@ -24,9 +24,14 @@ RUN mkdir -p staticfiles
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Add migrations
+# Make start script executable
+COPY start.sh .
+RUN chmod +x start.sh
+
+# Remove migrations and recreate them
+RUN rm -rf */migrations/0*.py
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-# Railway specific command
-CMD gunicorn book_management.wsgi:application --bind 0.0.0.0:$PORT
+# Use start script as entry point
+CMD ["./start.sh"]
