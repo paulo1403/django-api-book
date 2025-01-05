@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from datetime import datetime
 from django.contrib.auth.models import User
+from ..models import Book
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -24,12 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
-class BookSerializer(serializers.Serializer):
-    _id = serializers.CharField(read_only=True)
-    title = serializers.CharField(max_length=200)
-    author = serializers.CharField(max_length=200)
-    published_date = serializers.DateField()
-    genre = serializers.CharField(max_length=100)
-    price = serializers.FloatField()
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = ['id', 'title', 'author', 'published_date', 'genre', 'price', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']

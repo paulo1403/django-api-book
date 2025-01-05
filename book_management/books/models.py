@@ -1,46 +1,17 @@
-from datetime import datetime
-from bson import ObjectId
-from .utils.mongo_connection import MongoDBConnection
+from django.db import models
+from django.utils import timezone
 
-class Book:
-    collection_name = 'books'
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    published_date = models.DateField()
+    genre = models.CharField(max_length=100)
+    price = models.FloatField()
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    def __init__(self, title, author, published_date, genre, price, _id=None):
-        self._id = ObjectId(_id) if _id else ObjectId()
-        self.title = title
-        self.author = author
-        self.published_date = published_date
-        self.genre = genre
-        self.price = float(price)
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+    class Meta:
+        db_table = 'books'
 
-    @classmethod
-    def get_collection(cls):
-        mongo = MongoDBConnection.get_instance()
-        return mongo.get_collection(cls.collection_name)
-
-    def to_dict(self):
-        return {
-            '_id': self._id,
-            'title': self.title,
-            'author': self.author,
-            'published_date': self.published_date,
-            'genre': self.genre,
-            'price': self.price,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at
-        }
-
-    @classmethod
-    def from_dict(cls, data):
-        if not data:
-            return None
-        return cls(
-            _id=str(data['_id']),
-            title=data['title'],
-            author=data['author'],
-            published_date=data['published_date'],
-            genre=data['genre'],
-            price=data['price']
-        )
+    def __str__(self):
+        return self.title

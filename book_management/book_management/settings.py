@@ -64,39 +64,17 @@ TEMPLATES = [
     },
 ]
 
-# MongoDB configuration using pymongo
-MONGODB_URI = os.getenv('MONGODB_URI')
-if not MONGODB_URI:
-    raise ValueError("MONGODB_URI environment variable is not set!")
-
-# Configuración actualizada para MongoDB Atlas
-MONGODB_CLIENT = MongoClient(
-    MONGODB_URI,
-    serverSelectionTimeoutMS=5000,
-    tls=True,
-    tlsAllowInvalidCertificates=True,
-    retryWrites=True,
-    connectTimeoutMS=30000,
-    socketTimeoutMS=None,
-    connect=False,
-    maxPoolSize=1
-)
-
-try:
-    # Verificar la conexión
-    MONGODB_CLIENT.admin.command('ping')
-    print("Successfully connected to MongoDB!")
-except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
-    raise e
-
-MONGODB_DB = MONGODB_CLIENT[os.getenv('MONGODB_NAME', 'book_management')]
-
-# Minimal SQLite configuration for Django auth
+# Configuración de Djongo
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': os.getenv('MONGODB_NAME', 'book_management'),
+        'CLIENT': {
+            'host': os.getenv('MONGODB_URI'),
+            'tlsAllowInvalidCertificates': True,
+            'serverSelectionTimeoutMS': 5000,
+            'connectTimeoutMS': 30000,
+        }
     }
 }
 

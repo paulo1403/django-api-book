@@ -5,10 +5,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.conf import settings
-from bson import ObjectId
+from django.utils import timezone
 from datetime import datetime
-from .serializers.book_serializer import BookSerializer
+from .models import Book
+from .serializers.book_serializer import BookSerializer, UserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 
@@ -64,96 +64,76 @@ class BookListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        books = settings.MONGODB_DB.books.find()
-        book_list = [{**book, '_id': str(book['_id'])} for book in books]
-        return Response(book_list)
+        books = Book.objects.all()
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        book_data = request.data.copy()
-        book_data['created_at'] = datetime.utcnow()
-        book_data['updated_at'] = datetime.utcnow()
-        
-        result = settings.MONGODB_DB.books.insert_one(book_data)
-        book_data['_id'] = str(result.inserted_id)
-        return Response(book_data, status=status.HTTP_201_CREATED)
+        serializer = BookSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class BookDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
+    def get_object(self, pk):
         try:
-            book = settings.MONGODB_DB.books.find_one({'_id': ObjectId(pk)})
-            if book:
-                book['_id'] = str(book['_id'])
-                return Response(book)
+            return Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        book = self.get_object(pk)
+        if book is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = BookSerializer(book)
+        return Response(serializer.data)
 
     def put(self, request, pk):
-        try:
-            book_data = request.data.copy()
-            book_data['updated_at'] = datetime.utcnow()
-            
-            result = settings.MONGODB_DB.books.find_one_and_update(
-                {'_id': ObjectId(pk)},
-                {'$set': book_data},
-                return_document=True
-            )
-            
-            if result:
-                result['_id'] = str(result['_id'])
-                return Response(result)
+        book = self.get_object(pk)
+        if book is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = BookSerializer(book, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        try:
-            result = settings.MONGODB_DB.books.delete_one({'_id': ObjectId(pk)})
-            if result.deleted_count:
-                return Response(status=status.HTTP_204_NO_CONTENT)
+        book = self.get_object(pk)
+        if book is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        book.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class BookYearStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, year):
-        pipeline = [
-            {
-                '$match': {
-                    'published_date': {
-                        '$gte': datetime(year, 1, 1),
-                        '$lt': datetime(year + 1, 1, 1)
-                    }
-                }
-            },
-            {
-                '$group': {
-                    '_id': None,
-                    'avg_price': {'$avg': '$price'},
-                    'min_price': {'$min': '$price'},
-                    'max_price': {'$max': '$price'},
-                    'total_books': {'$sum': 1}
-                }
-            }
-        ]
+        start_date = datetime(year, 1, 1)
+        end_date = datetime(year + 1, 1, 1)
         
-        stats = list(settings.MONGODB_DB.books.aggregate(pipeline))
+        books = Book.objects.filter(
+            published_date__gte=start_date,
+            published_date__lt=end_date
+        )
         
-        if not stats:
+        if not books.exists():
             return Response({
                 'message': f'No books found for year {year}'
             }, status=status.HTTP_404_NOT_FOUND)
-            
+        
+        total_books = books.count()
+        prices = [book.price for book in books]
+        
         return Response({
             'year': year,
-            'average_price': round(stats[0]['avg_price'], 2),
-            'minimum_price': stats[0]['min_price'],
-            'maximum_price': stats[0]['max_price'],
-            'total_books': stats[0]['total_books']
+            'average_price': round(sum(prices) / len(prices), 2),
+            'minimum_price': min(prices),
+            'maximum_price': max(prices),
+            'total_books': total_books
         })
 
 class UserProfileView(APIView):
