@@ -17,8 +17,7 @@ COPY . .
 RUN mkdir -p staticfiles
 RUN python manage.py collectstatic --noinput
 
-# Set up start script
-COPY start.sh .
-RUN chmod +x start.sh
-
-CMD ["./start.sh"]
+# Reemplazar el COPY y CMD que usaban start.sh por los comandos directos
+CMD python manage.py migrate && \
+    python manage.py collectstatic --noinput && \
+    gunicorn book_management.wsgi:application --bind 0.0.0.0:$PORT
