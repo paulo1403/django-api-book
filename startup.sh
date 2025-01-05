@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Cambiar al directorio del proyecto
-cd Prueba\ tecnica/book_management
+cd book_management
 
 # Verify MongoDB connection
 python << END
