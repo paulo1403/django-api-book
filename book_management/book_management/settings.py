@@ -33,11 +33,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
     'books',
-    'corsheaders',  # Add this line
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # This must be first
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Añadir después de SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
