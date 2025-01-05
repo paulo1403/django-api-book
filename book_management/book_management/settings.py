@@ -72,7 +72,7 @@ DATABASES = {
         "ENFORCE_SCHEMA": False,
         "CLIENT": {
             "host": os.getenv("MONGODB_URI"),
-            "port": 49478,
+            "port": 27017,
             "username": os.getenv("MONGODB_USERNAME"),
             "password": os.getenv("MONGODB_PASSWORD"),
             "authSource": "admin",
