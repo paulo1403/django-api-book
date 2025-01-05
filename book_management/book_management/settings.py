@@ -64,23 +64,20 @@ TEMPLATES = [
     },
 ]
 
-# Configuración de Djongo actualizada para Railway
+# Configuración de Djongo actualizada para MongoDB Atlas
 DATABASES = {
     "default": {
         "ENGINE": "djongo",
         "NAME": os.getenv("MONGODB_NAME", "book_management"),
-        "ENFORCE_SCHEMA": False,
         "CLIENT": {
             "host": os.getenv("MONGODB_URI"),
-            "username": os.getenv("MONGODB_USERNAME"),
-            "password": os.getenv("MONGODB_PASSWORD"),
-            "authSource": "admin",
-            "authMechanism": "SCRAM-SHA-1",
-            "ssl": False,  # Changed to False for Railway internal connection
+            "ssl": True,
             "tlsAllowInvalidCertificates": True,
-            "serverSelectionTimeoutMS": 30000,
-            "connectTimeoutMS": 30000,
+            "serverSelectionTimeoutMS": 60000,  # Increased timeout
+            "connectTimeoutMS": 60000,          # Increased timeout
             "retryWrites": True,
+            "maxPoolSize": 100,                 # Added connection pool
+            "w": "majority",                    # Write concern
         },
     }
 }
