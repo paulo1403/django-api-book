@@ -5,6 +5,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV PORT=8000
+ENV SECRET_KEY=django-test-key
 
 # Install dependencies
 COPY requirements.txt .
