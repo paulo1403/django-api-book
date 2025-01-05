@@ -12,13 +12,13 @@ schema_view = get_schema_view(
     openapi.Info(
         title="Book Management API",
         default_version='v1',
-        description="API para gestión de libros",
+        description="API documentation for Book Management",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@bookmanagement.local"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
-    permission_classes=[permissions.AllowAny],
+    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
