@@ -9,9 +9,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "django-api-book-production.up.railway.app",
+    "localhost",
+    "127.0.0.1",
+    "*",
+]
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ORIGIN_ALLOW_ALL = True
@@ -77,8 +82,6 @@ DATABASES = {
         },
     }
 }
-
-DEBUG = os.getenv("DEBUG", "False") == "True"
 
 if not os.path.exists(os.path.join(BASE_DIR, "static")):
     os.makedirs(os.path.join(BASE_DIR, "static"))
@@ -203,16 +206,7 @@ CORS_ORIGIN_WHITELIST = [
     "https://book-management-portal.netlify.app",
 ]
 
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
 RAILWAY_STATIC_URL = "https://django-api-book-production.up.railway.app"
-
-ALLOWED_HOSTS = [
-    "django-api-book-production.up.railway.app",
-    "localhost",
-    "127.0.0.1",
-    "*",
-]
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -221,7 +215,3 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

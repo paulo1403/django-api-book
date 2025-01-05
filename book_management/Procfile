@@ -1,2 +1,2 @@
 release: python manage.py collectstatic --noinput
-web: gunicorn book_management.wsgi
+web: gunicorn book_management.wsgi --log-file -
