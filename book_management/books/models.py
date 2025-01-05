@@ -12,6 +12,7 @@ class Book(models.Model):
 
     class Meta:
         db_table = 'books'
+        managed = True
 
     def __str__(self):
         return self.title
