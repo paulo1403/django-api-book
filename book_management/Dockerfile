@@ -24,5 +24,9 @@ RUN mkdir -p staticfiles
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+# Add migrations
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+
 # Railway specific command
 CMD gunicorn book_management.wsgi:application --bind 0.0.0.0:$PORT
