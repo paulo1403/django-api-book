@@ -69,12 +69,12 @@ MONGODB_URI = os.getenv('MONGODB_URI')
 if not MONGODB_URI:
     raise ValueError("MONGODB_URI environment variable is not set!")
 
-# Configuración para MongoDB Atlas con parámetros SSL
+# Configuración actualizada para MongoDB Atlas
 MONGODB_CLIENT = MongoClient(
     MONGODB_URI,
     serverSelectionTimeoutMS=5000,
-    ssl=True,
-    ssl_cert_reqs='CERT_NONE',
+    tls=True,
+    tlsAllowInvalidCertificates=True,
     retryWrites=True,
     connectTimeoutMS=30000,
     socketTimeoutMS=None,

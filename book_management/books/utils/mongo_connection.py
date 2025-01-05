@@ -15,8 +15,8 @@ class MongoDBConnection:
         if self._client is None:
             self._client = MongoClient(
                 settings.MONGODB_URI,
-                ssl=True,
-                ssl_cert_reqs='CERT_NONE',
+                tls=True,
+                tlsAllowInvalidCertificates=True,
                 retryWrites=True,
                 connectTimeoutMS=30000,
                 socketTimeoutMS=None,
