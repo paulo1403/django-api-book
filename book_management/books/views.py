@@ -1,22 +1,17 @@
-from rest_framework import generics, status, viewsets, serializers
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.serializers import ModelSerializer
 from django.contrib.auth.models import User
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
-from django.utils import timezone
+from django.conf import settings
 from bson import ObjectId
 from datetime import datetime
 from .serializers.book_serializer import BookSerializer
-from .models import Book
-from .utils.mongo_connection import MongoDBConnection
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 
 # Registro de Usuarios
-class UserSerializer(ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     password_confirmation = serializers.CharField(write_only=True)
     
     class Meta:
@@ -67,119 +62,63 @@ class BookListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        mongo = MongoDBConnection.get_instance()
-        books_collection = mongo.get_collection(Book.collection_name)
-        books = books_collection.find()
-        
-        # Convertir a lista y serializar
-        book_list = [Book.from_db(book) for book in books]
-        serializer = BookSerializer(book_list, many=True)
-        return Response(serializer.data)
+        books = settings.MONGODB_DB.books.find()
+        book_list = [{**book, '_id': str(book['_id'])} for book in books]
+        return Response(book_list)
 
     def post(self, request):
-        serializer = BookSerializer(data=request.data)
-        if serializer.is_valid():
-            # Crear nuevo libro
-            book = Book(**serializer.validated_data)
-            mongo = MongoDBConnection.get_instance()
-            books_collection = mongo.get_collection(Book.collection_name)
-            books_collection.insert_one(book.to_dict())
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        book_data = request.data.copy()
+        book_data['created_at'] = datetime.utcnow()
+        book_data['updated_at'] = datetime.utcnow()
+        
+        result = settings.MONGODB_DB.books.insert_one(book_data)
+        book_data['_id'] = str(result.inserted_id)
+        return Response(book_data, status=status.HTTP_201_CREATED)
 
 class BookDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_object(self, pk):
-        try:
-            mongo = MongoDBConnection.get_instance()
-            books_collection = mongo.get_collection(Book.collection_name)
-            book_data = books_collection.find_one({'_id': ObjectId(pk)})
-            return Book.from_db(book_data) if book_data else None
-        except:
-            return None
-
     def get(self, request, pk):
-        book = self.get_object(pk)
-        if book is None:
+        try:
+            book = settings.MONGODB_DB.books.find_one({'_id': ObjectId(pk)})
+            if book:
+                book['_id'] = str(book['_id'])
+                return Response(book)
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = BookSerializer(book)
-        return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, pk):
-        book = self.get_object(pk)
-        if book is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = BookSerializer(book, data=request.data)
-        if serializer.is_valid():
-            mongo = MongoDBConnection.get_instance()
-            books_collection = mongo.get_collection(Book.collection_name)
-            
-            # Preparar datos actualizados
-            updated_data = serializer.validated_data
-            updated_data['published_date'] = datetime.strptime(request.data['published_date'], '%Y-%m-%d')
-            updated_data['updated_at'] = timezone.now()
-            
-            # Usar find_one_and_update para obtener el documento actualizado
-            result = books_collection.find_one_and_update(
-                {'_id': ObjectId(pk)},
-                {'$set': updated_data},
-                return_document=True
-            )
-            
-            if result:
-                # Convertir el resultado de nuevo a un objeto Book y serializar
-                updated_book = Book.from_db(result)
-                return Response(BookSerializer(updated_book).data)
-            return Response({'error': 'Update failed'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        book = self.get_object(pk)
-        if book is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        mongo = MongoDBConnection.get_instance()
-        books_collection = mongo.get_collection(Book.collection_name)
-        books_collection.delete_one({'_id': ObjectId(pk)})
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class BookViewSet(viewsets.ViewSet):
-    def update(self, request, pk=None):
         try:
-            book_collection = Book.get_collection()
             book_data = request.data.copy()
+            book_data['updated_at'] = datetime.utcnow()
             
-            # Convertir la cadena de fecha de publicación a datetime
-            if 'published_date' in book_data:
-                book_data['published_date'] = datetime.strptime(book_data['published_date'], '%Y-%m-%d')
-
-            # Actualizar el documento y obtener la versión actualizada
-            result = book_collection.find_one_and_update(
+            result = settings.MONGODB_DB.books.find_one_and_update(
                 {'_id': ObjectId(pk)},
                 {'$set': book_data},
                 return_document=True
             )
-
+            
             if result:
-                # Convertir ObjectId a cadena para la serialización
                 result['_id'] = str(result['_id'])
-                # Convertir datetime de nuevo a cadena para la respuesta
-                result['published_date'] = result['published_date'].strftime('%Y-%m-%d')
                 return Response(result)
-            return Response({'error': 'Book not found'}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            result = settings.MONGODB_DB.books.delete_one({'_id': ObjectId(pk)})
+            if result.deleted_count:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class BookYearStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, year):
-        mongo = MongoDBConnection.get_instance()
-        books_collection = mongo.get_collection(Book.collection_name)
-        
-        # Pipeline de agregación para calcular estadísticas del año
         pipeline = [
             {
                 '$match': {
@@ -200,7 +139,7 @@ class BookYearStatsView(APIView):
             }
         ]
         
-        stats = list(books_collection.aggregate(pipeline))
+        stats = list(settings.MONGODB_DB.books.aggregate(pipeline))
         
         if not stats:
             return Response({

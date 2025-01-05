@@ -72,13 +72,7 @@ if not MONGODB_URI:
 MONGODB_CLIENT = MongoClient(MONGODB_URI)
 MONGODB_DB = MONGODB_CLIENT[os.getenv('MONGODB_NAME', 'book_management')]
 
-# Minimal Django database config for sessions
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Remove DATABASES setting since we're using pure PyMongo
 
 # Create static directory if it doesn't exist
 if not os.path.exists(os.path.join(BASE_DIR, 'static')):
