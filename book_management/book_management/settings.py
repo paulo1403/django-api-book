@@ -89,6 +89,9 @@ DATABASES = {
 # Asegurarnos de que DEBUG está en False en producción
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+print("MONGODB_USERNAME:", os.getenv('MONGODB_USERNAME'))
+print("MONGODB_PASSWORD:", os.getenv('MONGODB_PASSWORD'))
+
 # Configuración específica para Railway
 if os.getenv('RAILWAY_ENVIRONMENT'):
     DATABASES['default']['CLIENT']['host'] = os.getenv('MONGODB_URI')
