@@ -64,19 +64,19 @@ TEMPLATES = [
     },
 ]
 
+PORT = os.getenv('PORT', '8000')
+
 DATABASES = {
     "default": {
         "ENGINE": "djongo",
         "NAME": os.getenv("MONGODB_NAME", "book_management"),
+        "ENFORCE_SCHEMA": False,
         "CLIENT": {
             "host": os.getenv("MONGODB_URI"),
-            "ssl": True,
+            "ssl": False,  # Cambiar a False para Railway
             "tlsAllowInvalidCertificates": True,
-            "serverSelectionTimeoutMS": 60000,
-            "connectTimeoutMS": 60000,
-            "retryWrites": False,
-            "maxPoolSize": 100,
-            "w": "majority",
+            "serverSelectionTimeoutMS": 30000,
+            "connectTimeoutMS": 30000,
         },
     }
 }

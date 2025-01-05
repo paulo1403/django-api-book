@@ -17,8 +17,3 @@ COPY . .
 # Create static directory and collect static files
 RUN mkdir -p staticfiles
 RUN python manage.py collectstatic --noinput
-
-# Reemplazar el COPY y CMD que usaban start.sh por los comandos directos
-CMD python manage.py migrate && \
-    python manage.py collectstatic --noinput && \
-    gunicorn book_management.wsgi:application --bind 0.0.0.0:$PORT
