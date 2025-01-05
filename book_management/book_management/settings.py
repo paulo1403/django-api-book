@@ -67,19 +67,15 @@ TEMPLATES = [
     },
 ]
 
-# Replace the DATABASES configuration with SQLite for Django auth
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Remove SQLite configuration and use only MongoDB
+DATABASES = {}  # Django needs this empty dict
 
 # MongoDB connection with mongoengine
-connect(
-    db=os.getenv('MONGODB_NAME', 'bookmanagement'),
-    host=os.getenv('MONGODB_URI')
-)
+MONGODB_URI = os.getenv('MONGODB_URI')
+if not MONGODB_URI:
+    raise ValueError("MONGODB_URI environment variable is not set!")
+
+connect(host=MONGODB_URI)
 
 # Create static directory if it doesn't exist
 if not os.path.exists(os.path.join(BASE_DIR, 'static')):
